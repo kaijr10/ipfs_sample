@@ -1,0 +1,36 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js"></script>
+    <!-- <script src="https://unpkg.com/ipfs-http-client/dist/index.min.js"></script> -->
+</head>
+<body>
+    <h1 id="tokenId"></h1>
+    <img id="image" src="">
+    <button id="change">Change Image</button>
+    <script type="text/javascript">
+        // https://github.com/ipfs/js-ipfs/blob/master/docs/BROWSERS.md
+        var data = [];
+        let index = 0;
+        $('#change').click( async function () {
+            console.log(data)
+            if (Object.keys(data).length != 0) {
+                document.getElementById('image').src = data[index]['image']
+                document.getElementById('tokenId').innerHTML = data[index]['tokenId']
+                index = index + 1;
+            } else {
+                const ipfs = await Ipfs.create();
+                const cid = 'QmX6cWfkrJzAW9tmDgKfMxSpCe1uaNQvAyKvq1dbF1FRej';
+                for await(const file of ipfs.ls(cid)) {
+                    // console.log(file)
+                    // console.log(file.path)
+                    for await (const chunk of ipfs.cat(file.path)) {
+                        var json = JSON.parse((new TextDecoder().decode(chunk)).toString());
+                        // console.log(json)
+                        data.push({'tokenId': json['tokenId'], 'image': json['image']})
+                    }
+                    // console.log(new TextDecoder().decode(chunks))
+                }
+            }
+        });
+    </script>
+</body>
